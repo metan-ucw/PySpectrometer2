@@ -36,45 +36,41 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=int, default=0, help="Video Device number e.g. 0, use v4l2-ctl --list-devices")
 parser.add_argument("--fps", type=int, default=30, help="Frame Rate e.g. 30")
+parser.add_argument("--width", type=int, default=800, help="Camera frame width, default 800")
+parser.add_argument("--height", type=int, default=600, help="Camera frame height, default 600")
 group = parser.add_mutually_exclusive_group()
 group.add_argument("--fullscreen", help="Fullscreen (Native 800*480)",action="store_true")
 group.add_argument("--waterfall", help="Enable Waterfall (Windowed only)",action="store_true")
 args = parser.parse_args()
+
 dispFullscreen = False
 dispWaterfall = False
+
 if args.fullscreen:
 	print("Fullscreen Spectrometer enabled")
 	dispFullscreen = True
+
 if args.waterfall:
 	print("Waterfall display enabled")
 	dispWaterfall = True
 
-if args.device:
-	dev = args.device
-else:
-	dev = 0
+frameWidth = args.width;
+frameHeight = args.height;
 
-if args.fps:
-	fps = args.fps
-else:
-	fps = 30
-
-frameWidth = 800
-frameHeight = 600
-
+if frameWidth < 800:
+    print("Camera frame width must be > 800")
+    exit(1)
 
 #init video
-cap = cv2.VideoCapture('/dev/video'+str(dev), cv2.CAP_V4L)
-#cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('/dev/video'+str(args.device), cv2.CAP_V4L)
 print("[info] W, H, FPS")
-cap.set(cv2.CAP_PROP_FRAME_WIDTH,frameWidth)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT,frameHeight)
-cap.set(cv2.CAP_PROP_FPS,fps)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, frameWidth)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frameHeight)
+cap.set(cv2.CAP_PROP_FPS, args.fps)
 print(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 print(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 print(cap.get(cv2.CAP_PROP_FPS))
 cfps = (cap.get(cv2.CAP_PROP_FPS))
-
 
 title1 = 'PySpectrometer 2 - Spectrograph'
 title2 = 'PySpectrometer 2 - Waterfall'
@@ -168,6 +164,15 @@ def snapshot(savedata):
 	message = "Last Save: "+timenow
 	return(message)
 
+def load_banner(width):
+	decoded_data = base64.b64decode(background)
+	np_data = np.frombuffer(decoded_data,np.uint8)
+	img = cv2.imdecode(np_data,3)
+	img_w = img.shape[1]
+	return cv2.copyMakeBorder(img, 0, 0, 0, width-img_w, cv2.BORDER_CONSTANT);
+
+banner = load_banner(frameWidth);
+
 while(cap.isOpened()):
 	# Capture frame-by-frame
 	ret, frame = cap.read()
@@ -187,11 +192,7 @@ while(cap.isOpened()):
 		cv2.line(cropped,(0,halfway-2),(frameWidth,halfway-2),(255,255,255),1)
 		cv2.line(cropped,(0,halfway+2),(frameWidth,halfway+2),(255,255,255),1)
 
-		#banner image
-		decoded_data = base64.b64decode(background)
-		np_data = np.frombuffer(decoded_data,np.uint8)
-		img = cv2.imdecode(np_data,3)
-		messages = img
+		messages = banner
 
 		#blank image for Graph
 		graph = np.zeros([320,frameWidth,3],dtype=np.uint8)
