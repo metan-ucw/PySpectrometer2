@@ -5,7 +5,7 @@ PySpectrometer2 Les Wright 2022
 https://www.youtube.com/leslaboratory
 https://github.com/leswright1977
 
-This project is a follow on from: https://github.com/leswright1977/PySpectrometer 
+This project is a follow on from: https://github.com/leswright1977/PySpectrometer
 
 This is a more advanced, but more flexible version of the original program. Tk Has been dropped as the GUI to allow fullscreen mode on Raspberry Pi systems and the iterface is designed to fit 800*480 screens, which seem to be a common resolutin for RPi LCD's, paving the way for the creation of a stand alone benchtop instrument.
 
@@ -46,8 +46,7 @@ if args.fullscreen:
 if args.waterfall:
 	print("Waterfall display enabled")
 	dispWaterfall = True
-	
-	
+
 
 frameWidth = 800
 frameHeight = 600
@@ -97,7 +96,7 @@ thresh = 20 #Threshold max val 100
 
 calibrate = False
 
-clickArray = [] 
+clickArray = []
 cursorX = 0
 cursorY = 0
 def handle_mouse(event,x,y,flags,param):
@@ -107,7 +106,7 @@ def handle_mouse(event,x,y,flags,param):
 	mouseYOffset = 160
 	if event == cv2.EVENT_MOUSEMOVE:
 		cursorX = x
-		cursorY = y	
+		cursorY = y
 	if event == cv2.EVENT_LBUTTONDOWN:
 		mouseX = x
 		mouseY = y-mouseYOffset
@@ -169,10 +168,10 @@ while True:
 	# Capture frame-by-frame
 	frame = picam2.capture_array()
 	y=int((frameHeight/2)-40) #origin of the vertical crop
-	#y=200 	#origin of the vert crop
-	x=0   	#origin of the horiz crop
-	h=80 	#height of the crop
-	w=frameWidth 	#width of the crop
+	#y=200	#origin of the vert crop
+	x=0	#origin of the horiz crop
+	h=80	#height of the crop
+	w=frameWidth	#width of the crop
 	cropped = frame[y:y+h, x:x+w]
 	bwimage = cv2.cvtColor(cropped,cv2.COLOR_BGR2GRAY)
 	rows,cols = bwimage.shape
@@ -208,20 +207,19 @@ while True:
 		if i>=64:
 			if i%64==0: #suppress the first line then draw the rest...
 				cv2.line(graph,(0,i),(frameWidth,i),(100,100,100),1)
-	
+
 	#Now process the intensity data and display it
 	#intensity = []
 	for i in range(cols):
-		#data = bwimage[halfway,i] #pull the pixel data from the halfway mark	
+		#data = bwimage[halfway,i] #pull the pixel data from the halfway mark
 		#print(type(data)) #numpy.uint8
 		#average the data of 3 rows of pixels:
 		dataminus1 = bwimage[halfway-1,i]
 		datazero = bwimage[halfway,i] #pull the pixel data from the halfway mark
 		dataplus1 = bwimage[halfway+1,i]
-		data = (int(dataminus1)+int(datazero)+int(dataplus1))/3		
+		data = (int(dataminus1)+int(datazero)+int(dataplus1))/3
 		data = np.uint8(data)
-				
-		
+
 		if holdpeaks == True:
 			if data > intensity[i]:
 				intensity[i] = data
@@ -256,16 +254,16 @@ while True:
 
 	#Draw the intensity data :-)
 	#first filter if not holding peaks!
-	
+
 	if holdpeaks == False:
 		intensity = savitzky_golay(intensity,17,savpoly)
 		intensity = np.array(intensity)
 		intensity = intensity.astype(int)
-		holdmsg = "Holdpeaks OFF" 
+		holdmsg = "Holdpeaks OFF"
 	else:
 		holdmsg = "Holdpeaks ON"
-		
-	
+
+
 	#now draw the intensity data....
 	index=0
 	for i in intensity:
@@ -317,11 +315,10 @@ while True:
 			cv2.circle(graph,(mouseX,mouseY),5,(0,0,0),-1)
 			#we can display text :-) so we can work out wavelength from x-pos and display it ultimately
 			cv2.putText(graph,str(mouseX),(mouseX+5,mouseY),cv2.FONT_HERSHEY_SIMPLEX,0.4,(0,0,0))
-	
 
 
 
-	#stack the images and display the spectrum	
+	#stack the images and display the spectrum
 	spectrum_vertical = np.vstack((messages,cropped, graph))
 	#dividing lines...
 	cv2.line(spectrum_vertical,(0,80),(frameWidth,80),(255,255,255),1)
@@ -361,7 +358,7 @@ while True:
 		cv2.putText(waterfall_vertical,calmsg3,(490,33),font,0.4,(0,255,255),1, cv2.LINE_AA)
 		cv2.putText(waterfall_vertical,saveMsg,(490,51),font,0.4,(0,255,255),1, cv2.LINE_AA)
 		cv2.putText(waterfall_vertical,"Gain: "+str(picamGain),(490,69),font,0.4,(0,255,255),1, cv2.LINE_AA)
-		
+
 		cv2.putText(waterfall_vertical,holdmsg,(640,15),font,0.4,(0,255,255),1, cv2.LINE_AA)
 
 		cv2.imshow(title2,waterfall_vertical)
@@ -454,11 +451,10 @@ while True:
 			if picamGain <=0:
 				picamGain = 0.0
 			picam2.set_controls({"AnalogueGain": picamGain})
-			print("Camera Gain: "+str(picamGain))								
-				
+			print("Camera Gain: "+str(picamGain))
 
 
- 
+
 #Everything done
 cv2.destroyAllWindows()
 
