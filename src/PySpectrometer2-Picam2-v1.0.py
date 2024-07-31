@@ -388,7 +388,7 @@ while True:
 			savedata.append(graphdata)
 		saveMsg = snapshot(savedata)
 	elif keyPress == ord("c"):
-		calcomplete = writecal(clickArray)
+		calcomplete = writecal(clickArray, False)
 		if calcomplete:
 			#overwrite wavelength data
 			#Go grab the computed calibration data

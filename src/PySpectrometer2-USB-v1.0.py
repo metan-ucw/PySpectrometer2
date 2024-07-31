@@ -124,7 +124,6 @@ holdpeaks = False #are we holding peaks?
 measure = False #are we measuring?
 recPixels = False #are we measuring pixels and recording clicks?
 
-
 #messages
 msg1 = ""
 saveMsg = "No data saved"
@@ -139,6 +138,7 @@ wavelengthData = caldata[0]
 calmsg1 = caldata[1]
 calmsg2 = caldata[2]
 calmsg3 = caldata[3]
+flip = caldata[4]
 
 #generate the craticule data
 graticuleData = generateGraticule(wavelengthData)
@@ -184,6 +184,10 @@ while(cap.isOpened()):
 		h=80	#height of the crop
 		w=frameWidth	#width of the crop
 		cropped = frame[y:y+h, x:x+w]
+
+		if flip:
+			cropped = cv2.flip(cropped, 1)
+
 		bwimage = cv2.cvtColor(cropped,cv2.COLOR_BGR2GRAY)
 		rows,cols = bwimage.shape
 		halfway =int(rows/2)
@@ -392,7 +396,7 @@ while(cap.isOpened()):
 				savedata.append(graphdata)
 			saveMsg = snapshot(savedata)
 		elif keyPress == ord("c"):
-			calcomplete = writecal(clickArray)
+			calcomplete = writecal(clickArray, flip)
 			if calcomplete:
 				#overwrite wavelength data
 				#Go grab the computed calibration data
@@ -401,6 +405,7 @@ while(cap.isOpened()):
 				calmsg1 = caldata[1]
 				calmsg2 = caldata[2]
 				calmsg3 = caldata[3]
+				flip = caldata[4]
 				#overwrite graticule data
 				graticuleData = generateGraticule(wavelengthData)
 				tens = (graticuleData[0])
@@ -443,6 +448,8 @@ while(cap.isOpened()):
 				thresh-=1
 				if thresh <=0:
 					thresh=0
+		elif keyPress == ord("f"):
+				flip = not flip
 	else:
 		break
 

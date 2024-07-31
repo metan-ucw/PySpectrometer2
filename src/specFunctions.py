@@ -244,6 +244,7 @@ def readcal(width):
 	#Les Wright 28 Sept 2022
 	errors = 0
 	message = 0 #variable to store returned message data
+	flip = False
 	try:
 		print("Loading calibration data...")
 		file = open('caldata.txt', 'r')
@@ -259,24 +260,26 @@ def readcal(width):
 		line1 = lines[1].strip()
 		wavelengths = line1.split(',')
 		wavelengths = [float(i) for i in wavelengths]#convert list of strings to floats
+		if len(lines) > 2 and lines[2].strip() == "flip":
+			flip = True
 	except:
 		errors = 1
 
 	try:
 		if (len(pixels) != len(wavelengths)):
-			#The Calibration points are of unequal length!
+			print("The Calibration points are of unequal length!")
 			errors = 1
 		if (len(pixels) < 3):
-			#The Cal data contains less than 3 pixels!
+			print("The Cal data contains less than 3 pixels!")
 			errors = 1
 		if (len(wavelengths) < 3):
-			#The Cal data contains less than 3 wavelengths!
+			print("The Cal data contains less than 3 wavelengths!")
 			errors = 1
 	except:
 		errors = 1
 
 	if errors == 1:
-		print("Loading of Calibration data failed (missing caldata.txt or corrupted data!")
+		print("Loading of Calibration data failed (missing caldata.txt or corrupted data!)")
 		print("Loading placeholder data...")
 		print("You MUST perform a Calibration to use this software!\n\n")
 		pixels = [0,400,800]
@@ -367,10 +370,12 @@ def readcal(width):
 	returndata.append(calmsg1)
 	returndata.append(calmsg2)
 	returndata.append(calmsg3)
+	returndata.append(flip)
+
 	return returndata
 
 
-def writecal(clickArray):
+def writecal(clickArray, flip):
 	calcomplete = False
 	pxdata = []
 	wldata = []
@@ -394,6 +399,8 @@ def writecal(clickArray):
 	f = open('caldata.txt','w')
 	f.write(pxdata+'\r\n')
 	f.write(wldata+'\r\n')
+	if flip:
+		f.write("flip\r\n")
 	print("Calibration Data Written!")
 	calcomplete = True
 	return calcomplete
